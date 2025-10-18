@@ -1,0 +1,49 @@
+jenkins:
+    systemMessage: "Jenkins configured automatically by Jenkins Configuration as Code plugin"
+    numExecutors: 0
+    labelString: ""
+    mode: EXCLUSIVE
+    securityRealm:
+        local:
+            allowsSignup: false
+            users:
+                - id: "${JENKINS_ADMIN_USERNAME}"
+                  password: "${JENKINS_ADMIN_PASSWORD}"
+    authorizationStrategy:
+        loggedInUsersCanDoAnything:
+            allowAnonymousRead: false
+    nodes:
+        - permanent:
+              name: "build-agent"
+              labelString: "build-agent"
+              mode: NORMAL
+              remoteFS: "/home/jenkins/agent"
+              retentionStrategy: always
+              launcher:
+                  inbound:
+                      workDirSettings:
+                            disabled: false
+                            internalDir: "remoting"
+                            failIfWorkDirIsMissing: false
+appearance:
+    themeManager:
+        disableUserThemes: true
+        theme: "darkSystem" 
+credentials:
+    system:
+        domainCredentials:
+            - credentials:
+                - string:
+                    scope: GLOBAL
+                    id: "github-token"
+                    secret: "${GITHUB_TOKEN}"
+                    description: "GitHub Personal Access Token"
+unclassified:
+    gitHubPluginConfig:
+        configs:
+            - name: "GitHub"
+              apiUrl: "https://api.github.com"
+              manageHooks: true
+              clientCacheSize: 20
+              credentialsId: "github-token"
+
