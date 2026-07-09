@@ -1,0 +1,53 @@
+name: Deploy Nginx Reverse Proxy Config
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'reverse-proxy/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Test Nginx Config
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:ro \
+          -v ${{ github.workspace }}/reverse-proxy/sites-available:/etc/nginx/http.d:ro \
+          nginx:alpine nginx -t
+
+    - name: Copy nginx.conf to server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.REVERSE_PROXY_SERVER_HOST }}
+        port: ${{ secrets.REVERSE_PROXY_SERVER_HOST_PORT }}
+        username: ${{ secrets.REVERSE_PROXY_SERVER_USER }}
+        password: ${{ secrets.REVERSE_PROXY_SERVER_PASSWORD }}
+        source: "reverse-proxy/nginx.conf"
+        target: "/etc/nginx"
+        strip_components: 1
+
+    - name: Copy sites to http.d on server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.REVERSE_PROXY_SERVER_HOST }}
+        port: ${{ secrets.REVERSE_PROXY_SERVER_HOST_PORT }}
+        username: ${{ secrets.REVERSE_PROXY_SERVER_USER }}
+        password: ${{ secrets.REVERSE_PROXY_SERVER_PASSWORD }}
+        source: "reverse-proxy/sites-available/*"
+        target: "/etc/nginx/http.d"
+        strip_components: 2
+
+    - name: Reload Nginx
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.REVERSE_PROXY_SERVER_HOST }}
+        port: ${{ secrets.REVERSE_PROXY_SERVER_HOST_PORT }}
+        username: ${{ secrets.REVERSE_PROXY_SERVER_USER }}
+        password: ${{ secrets.REVERSE_PROXY_SERVER_PASSWORD }}
+        script: |
+          sudo nginx -t && sudo systemctl reload nginx
