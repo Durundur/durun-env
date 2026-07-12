@@ -22,9 +22,6 @@ mkdir -p /etc/nginx/http.d
 echo "[nginx] Testing config..."
 nginx -t
 
-echo "[nginx] Reloading nginx..."
-nginx -s reload
-
 echo "[nginx] NGINX configured."
 
 
@@ -59,8 +56,5 @@ chmod +x /etc/init.d/wg-quick
 
 echo "[wireguard] Enabling wg-quick service..."
 rc-update add wg-quick
-
-echo "[wireguard] Restarting WireGuard..."
-rc-service wg-quick restart
 
 echo "=== Installation & configuration complete ==="
