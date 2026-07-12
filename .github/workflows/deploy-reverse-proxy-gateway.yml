@@ -1,0 +1,89 @@
+name: Deploy Reverse Proxy Gateway
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'reverse-proxy-gateway/**'
+      - '.github/workflows/deploy-reverse-proxy-gateway.yml'
+
+env:
+  SSH_HOST: ${{ secrets.REVERSE_PROXY_SERVER_HOST }}
+  SSH_PORT: ${{ secrets.REVERSE_PROXY_SERVER_HOST_PORT }}
+  SSH_USER: ${{ secrets.REVERSE_PROXY_SERVER_USER }}
+  SSH_PASS: ${{ secrets.REVERSE_PROXY_SERVER_PASSWORD }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Inject secrets into WireGuard config
+      env:
+        REVERSE_PROXY_PRIVATE_KEY: ${{ secrets.REVERSE_PROXY_PRIVATE_KEY }}
+        REVERSE_PROXY_PUBLIC_KEY: ${{ secrets.REVERSE_PROXY_PUBLIC_KEY }}
+        ORACLE_1_PRIVATE_KEY: ${{ secrets.ORACLE_1_PRIVATE_KEY }}
+        ORACLE_1_PUBLIC_KEY: ${{ secrets.ORACLE_1_PUBLIC_KEY }}
+        ORACLE_2_PRIVATE_KEY: ${{ secrets.ORACLE_2_PRIVATE_KEY }}
+        ORACLE_2_PUBLIC_KEY: ${{ secrets.ORACLE_2_PUBLIC_KEY }}
+        VPN_PRIVATE_KEY: ${{ secrets.VPN_PRIVATE_KEY }}
+        VPN_PUBLIC_KEY: ${{ secrets.VPN_PUBLIC_KEY }}
+      run: |
+        envsubst '${REVERSE_PROXY_PRIVATE_KEY}' < reverse-proxy-gateway/wireguard/wg0.conf > reverse-proxy-gateway/wireguard/wg0.conf.tmp
+        mv reverse-proxy-gateway/wireguard/wg0.conf.tmp reverse-proxy-gateway/wireguard/wg0.conf
+
+        envsubst '${ORACLE_1_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/oracle1.conf > reverse-proxy-gateway/wireguard/oracle1.conf.tmp
+        mv reverse-proxy-gateway/wireguard/oracle1.conf.tmp reverse-proxy-gateway/wireguard/oracle1.conf
+
+        envsubst '${ORACLE_2_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/oracle2.conf > reverse-proxy-gateway/wireguard/oracle2.conf.tmp
+        mv reverse-proxy-gateway/wireguard/oracle2.conf.tmp reverse-proxy-gateway/wireguard/oracle2.conf
+
+        envsubst '${VPN_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/vpn.conf > reverse-proxy-gateway/wireguard/vpn.conf.tmp
+        mv reverse-proxy-gateway/wireguard/vpn.conf.tmp reverse-proxy-gateway/wireguard/vpn.conf
+
+        envsubst '${REVERSE_PROXY_PUBLIC_KEY} ${ORACLE_1_PRIVATE_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle1.conf > reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp
+        mv reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp reverse-proxy-gateway/wireguard/clients/oracle1.conf
+
+        envsubst '${REVERSE_PROXY_PUBLIC_KEY} ${ORACLE_2_PRIVATE_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle2.conf > reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp
+        mv reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp reverse-proxy-gateway/wireguard/clients/oracle2.conf
+
+        envsubst '${REVERSE_PROXY_PUBLIC_KEY} ${VPN_PRIVATE_KEY}' < reverse-proxy-gateway/wireguard/clients/vpn.conf > reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp
+        mv reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp reverse-proxy-gateway/wireguard/clients/vpn.conf
+
+    - name: Test Nginx Config
+      run: |
+        docker run --rm \
+          --entrypoint /bin/sh \
+          -v ${{ github.workspace }}/reverse-proxy-gateway/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+          -v ${{ github.workspace }}/reverse-proxy-gateway/nginx/sites-available:/etc/nginx/http.d:ro \
+          nginx:1.27.0-alpine3.19 -c "adduser -D www && rm -f /etc/nginx/conf.d/default.conf && nginx -t"
+
+    - name: Copy config files
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ env.SSH_HOST }}
+        port: ${{ env.SSH_PORT }}
+        username: ${{ env.SSH_USER }}
+        password: ${{ env.SSH_PASS }}
+        source: "reverse-proxy-gateway/nginx,reverse-proxy-gateway/wireguard"
+        target: "~/gateway-tmp"
+
+    - name: Deploy configs and restart services
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ env.SSH_HOST }}
+        port: ${{ env.SSH_PORT }}
+        username: ${{ env.SSH_USER }}
+        password: ${{ env.SSH_PASS }}
+        script: |
+          echo "$SSH_PASS" | sudo -S cp ~/gateway-tmp/nginx/nginx.conf /etc/nginx/nginx.conf
+          echo "$SSH_PASS" | sudo -S cp -r ~/gateway-tmp/nginx/sites-available/* /etc/nginx/http.d/
+
+          echo "$SSH_PASS" | sudo -S cp -r ~/gateway-tmp/wireguard /etc/wireguard
+
+          rm -rf ~/gateway-tmp
+
+          echo "$SSH_PASS" | sudo -S nginx -t && echo "$SSH_PASS" | sudo -S nginx -s reload
+          echo "$SSH_PASS" | sudo -S rc-service wg-quick@wg0 restart
