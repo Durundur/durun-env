@@ -83,7 +83,7 @@ jobs:
         script: |
           sudo -S cp ~/gateway-tmp/nginx/nginx.conf /etc/nginx/nginx.conf <<< "$SSH_PASS"
           sudo -S cp -r ~/gateway-tmp/nginx/sites-available/* /etc/nginx/http.d/ <<< "$SSH_PASS"
-          sudo -S cp -r ~/gateway-tmp/wireguard /etc/wireguard <<< "$SSH_PASS"
+          sudo -S cp -r ~/gateway-tmp/wireguard/* /etc/wireguard/ <<< "$SSH_PASS"
           
           rm -rf ~/gateway-tmp
           
