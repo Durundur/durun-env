@@ -19,10 +19,6 @@ rc-update add nginx
 echo "[nginx] Creating config directories..."
 mkdir -p /etc/nginx/http.d
 
-echo "[nginx] Copying nginx configs..."
-cp reverse-proxy-gateway/nginx/nginx.conf /etc/nginx/nginx.conf
-cp -r reverse-proxy-gateway/nginx/sites-available/* /etc/nginx/http.d/
-
 echo "[nginx] Testing config..."
 nginx -t
 
@@ -38,14 +34,6 @@ echo "[nginx] NGINX configured."
 
 echo "[wireguard] Installing WireGuard tools..."
 apk add wireguard-tools
-
-echo "[wireguard] Creating WireGuard directories..."
-mkdir -p /etc/wireguard
-mkdir -p /etc/wireguard/peers
-
-echo "[wireguard] Copying WireGuard configs..."
-cp reverse-proxy-gateway/wireguard/wg0.conf /etc/wireguard/wg0.conf
-cp reverse-proxy-gateway/wireguard/peers/* /etc/wireguard/peers/
 
 echo "[wireguard] Installing wg-quick OpenRC service..."
 cat << 'EOF' > /etc/init.d/wg-quick
