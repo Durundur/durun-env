@@ -34,13 +34,13 @@ jobs:
         envsubst '${REVERSE_PROXY_PRIVATE_KEY} ${ORACLE_1_PUBLIC_KEY} ${ORACLE_2_PUBLIC_KEY} ${VPN_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/wg0.conf > reverse-proxy-gateway/wireguard/wg0.conf.tmp
         mv reverse-proxy-gateway/wireguard/wg0.conf.tmp reverse-proxy-gateway/wireguard/wg0.conf
 
-        envsubst '${REVERSE_PROXY_PUBLIC_KEY} ${ORACLE_1_PRIVATE_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle1.conf > reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp
+        envsubst '${ORACLE_1_PRIVATE_KEY} ${REVERSE_PROXY_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle1.conf > reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp
         mv reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp reverse-proxy-gateway/wireguard/clients/oracle1.conf
 
-        envsubst '${REVERSE_PROXY_PUBLIC_KEY} ${ORACLE_2_PRIVATE_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle2.conf > reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp
+        envsubst '${ORACLE_2_PRIVATE_KEY} ${REVERSE_PROXY_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle2.conf > reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp
         mv reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp reverse-proxy-gateway/wireguard/clients/oracle2.conf
 
-        envsubst '${REVERSE_PROXY_PUBLIC_KEY} ${VPN_PRIVATE_KEY}' < reverse-proxy-gateway/wireguard/clients/vpn.conf > reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp
+        envsubst '${VPN_PRIVATE_KEY} ${REVERSE_PROXY_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/vpn.conf > reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp
         mv reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp reverse-proxy-gateway/wireguard/clients/vpn.conf
 
     - name: Test Nginx Config
