@@ -69,6 +69,7 @@ jobs:
         password: ${{ env.SSH_PASS }}
         source: "reverse-proxy-gateway/nginx,reverse-proxy-gateway/wireguard"
         target: "~/gateway-tmp"
+        strip_components: 1
 
     - name: Deploy configs and restart services
       uses: appleboy/ssh-action@master
