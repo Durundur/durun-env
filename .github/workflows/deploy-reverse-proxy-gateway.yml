@@ -79,5 +79,4 @@ jobs:
           rm -rf ~/gateway-tmp
           
           sudo -S nginx -t <<< "$SSH_PASS" && sudo -S nginx -s reload <<< "$SSH_PASS"
-          sudo -S wg-quick down wg0 <<< "$SSH_PASS" || true
-          sudo -S wg-quick up wg0 <<< "$SSH_PASS"
+          sudo -S rc-service wg-quick restart <<< "$SSH_PASS"

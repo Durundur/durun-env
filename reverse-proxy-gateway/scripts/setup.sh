@@ -44,14 +44,27 @@ depend() {
 }
 
 start() {
+    if ip link show wg0 >/dev/null 2>&1; then
+        einfo "WireGuard interface wg0 is already up"
+        return 0
+    fi
+
+    ebegin "Starting WireGuard interface wg0"
     wg-quick up wg0
+    eend $?
 }
 
 stop() {
+    if ! ip link show wg0 >/dev/null 2>&1; then
+        einfo "WireGuard interface wg0 is already down"
+        return 0
+    fi
+
+    ebegin "Stopping WireGuard interface wg0"
     wg-quick down wg0
+    eend $?
 }
 EOF
-
 chmod +x /etc/init.d/wg-quick
 
 echo "[wireguard] Enabling wg-quick service..."
