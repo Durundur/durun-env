@@ -7,7 +7,7 @@ on:
 jobs:
   trigger-deploy-runner:
     name: Trigger deploy runner
-
+    runs-on: ubuntu-latest
     steps:
       - name: Send event to deploy runner
         run: |
