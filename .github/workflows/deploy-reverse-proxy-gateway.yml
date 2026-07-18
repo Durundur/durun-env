@@ -22,25 +22,25 @@ jobs:
 
     - name: Inject secrets into WireGuard config
       env:
-        REVERSE_PROXY_PRIVATE_KEY: ${{ secrets.REVERSE_PROXY_PRIVATE_KEY }}
-        REVERSE_PROXY_PUBLIC_KEY: ${{ secrets.REVERSE_PROXY_PUBLIC_KEY }}
-        ORACLE_1_PRIVATE_KEY: ${{ secrets.ORACLE_1_PRIVATE_KEY }}
-        ORACLE_1_PUBLIC_KEY: ${{ secrets.ORACLE_1_PUBLIC_KEY }}
-        ORACLE_2_PRIVATE_KEY: ${{ secrets.ORACLE_2_PRIVATE_KEY }}
-        ORACLE_2_PUBLIC_KEY: ${{ secrets.ORACLE_2_PUBLIC_KEY }}
-        VPN_PRIVATE_KEY: ${{ secrets.VPN_PRIVATE_KEY }}
-        VPN_PUBLIC_KEY: ${{ secrets.VPN_PUBLIC_KEY }}
+        REVERSE_PROXY_TUNNEL_PRIVATE_KEY: ${{ secrets.REVERSE_PROXY_TUNNEL_PRIVATE_KEY }}
+        REVERSE_PROXY_TUNNEL_PUBLIC_KEY: ${{ secrets.REVERSE_PROXY_TUNNEL_PUBLIC_KEY }}
+        ORACLE_1_TUNNEL_PRIVATE_KEY: ${{ secrets.ORACLE_1_TUNNEL_PRIVATE_KEY }}
+        ORACLE_1_TUNNEL_PUBLIC_KEY: ${{ secrets.ORACLE_1_TUNNEL_PUBLIC_KEY }}
+        ORACLE_2_TUNNEL_PRIVATE_KEY: ${{ secrets.ORACLE_2_TUNNEL_PRIVATE_KEY }}
+        ORACLE_2_TUNNEL_PUBLIC_KEY: ${{ secrets.ORACLE_2_TUNNEL_PUBLIC_KEY }}
+        VPN_TUNNEL_PRIVATE_KEY: ${{ secrets.VPN_TUNNEL_PRIVATE_KEY }}
+        VPN_TUNNEL_PUBLIC_KEY: ${{ secrets.VPN_TUNNEL_PUBLIC_KEY }}
       run: |
-        envsubst '${REVERSE_PROXY_PRIVATE_KEY} ${ORACLE_1_PUBLIC_KEY} ${ORACLE_2_PUBLIC_KEY} ${VPN_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/wg0.conf > reverse-proxy-gateway/wireguard/wg0.conf.tmp
+        envsubst '${REVERSE_PROXY_TUNNEL_PRIVATE_KEY} ${ORACLE_1_TUNNEL_PUBLIC_KEY} ${ORACLE_2_TUNNEL_PUBLIC_KEY} ${VPN_TUNNEL_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/wg0.conf > reverse-proxy-gateway/wireguard/wg0.conf.tmp
         mv reverse-proxy-gateway/wireguard/wg0.conf.tmp reverse-proxy-gateway/wireguard/wg0.conf
 
-        envsubst '${ORACLE_1_PRIVATE_KEY} ${REVERSE_PROXY_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle1.conf > reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp
+        envsubst '${ORACLE_1_TUNNEL_PRIVATE_KEY} ${REVERSE_PROXY_TUNNEL_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle1.conf > reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp
         mv reverse-proxy-gateway/wireguard/clients/oracle1.conf.tmp reverse-proxy-gateway/wireguard/clients/oracle1.conf
 
-        envsubst '${ORACLE_2_PRIVATE_KEY} ${REVERSE_PROXY_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle2.conf > reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp
+        envsubst '${ORACLE_2_TUNNEL_PRIVATE_KEY} ${REVERSE_PROXY_TUNNEL_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/oracle2.conf > reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp
         mv reverse-proxy-gateway/wireguard/clients/oracle2.conf.tmp reverse-proxy-gateway/wireguard/clients/oracle2.conf
 
-        envsubst '${VPN_PRIVATE_KEY} ${REVERSE_PROXY_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/vpn.conf > reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp
+        envsubst '${VPN_TUNNEL_PRIVATE_KEY} ${REVERSE_PROXY_TUNNEL_PUBLIC_KEY}' < reverse-proxy-gateway/wireguard/clients/vpn.conf > reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp
         mv reverse-proxy-gateway/wireguard/clients/vpn.conf.tmp reverse-proxy-gateway/wireguard/clients/vpn.conf
 
     - name: Test Nginx Config

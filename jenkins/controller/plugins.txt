@@ -1,7 +1,0 @@
-workflow-aggregator
-docker-plugin
-configuration-as-code
-ssh-slaves
-git
-github
-dark-theme
