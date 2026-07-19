@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     sudo \
-    libicu-dev
+    libicu-dev \
+    jq
 
 RUN curl -fsSL https://get.docker.com/ | sh
 
