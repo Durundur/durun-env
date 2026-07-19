@@ -66,9 +66,3 @@ jobs:
                 -p ${HOST_PORT}:${CONTAINER_PORT} \
                 --env-file /apps/${APP_NAME}/app.env \
                 ${IMAGE_URL}"
-
-          - name: Post-deployment cleaning
-            if: always()
-            run: |
-              rm -rf app-code private_key.pem
-              docker image prune -f
