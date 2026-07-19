@@ -22,15 +22,15 @@ jobs:
 
           - name: Build docker image
             run: |
-              pwd
-              ls -la
               cd app-code
-              sudo docker build -t registry.gitlab.com/durundur/env-registry/${{ github.event.client_payload.app_name }}:latest .
+              APP_NAME_LOWER=$(echo "${{ github.event.client_payload.app_name }}" | tr '[:upper:]' '[:lower:]')
+              sudo docker build -t registry.gitlab.com/durundur/env-registry/${APP_NAME_LOWER}:latest .
 
           - name: Push docker image to registry
             run: |
-              echo "${{ secrets.GITLAB_REGISTRY_TOKEN }}" | docker login registry.gitlab.com -u "${{ secrets.GITLAB_REGISTRY_USER }}" --password-stdin
-              sudo docker push registry.gitlab.com/durundur/env-registry/${{ github.event.client_payload.app_name }}:latest
+              echo "${{ secrets.GITLAB_REGISTRY_TOKEN }}" | sudo docker login registry.gitlab.com -u "${{ secrets.GITLAB_REGISTRY_USER }}" --password-stdin
+              APP_NAME_LOWER=$(echo "${{ github.event.client_payload.app_name }}" | tr '[:upper:]' '[:lower:]')
+              sudo docker push registry.gitlab.com/durundur/env-registry/${APP_NAME_LOWER}:latest
 
           - name: Deploy container to server
             env:
