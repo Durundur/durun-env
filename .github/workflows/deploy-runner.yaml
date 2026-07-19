@@ -36,7 +36,7 @@ jobs:
               APP_NAME: ${{ github.event.client_payload.app_name }}
               HOST_PORT: ${{ github.event.client_payload.host_port }}
               CONTAINER_PORT: ${{ github.event.client_payload.container_port }}
-              APP_SECRETS_JSON: ${{ toJson(github.event.client_payload.app_secrets) }}
+              ENV_VARIABLES_JSON: ${{ toJson(github.event.client_payload.env_variables) }}
             run: |
               if [ "$DEPLOY_TARGET" = "oracle1" ]; then
                 SERVER_HOST="${{ secrets.ORACLE_1_SERVER_HOST }}"
@@ -55,7 +55,7 @@ jobs:
 
               ssh -i private_key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} \
                 "mkdir -p /apps/${APP_NAME} && \
-                echo '${APP_SECRETS_JSON}' | jq -r 'to_entries | .[] | \"\(.key)=\(.value)\"' > /apps/${APP_NAME}/app.env && \
+                echo '${ENV_VARIABLES_JSON}' | jq -r 'to_entries | .[] | \"\(.key)=\(.value)\"' > /apps/${APP_NAME}/app.env && \
                 echo '${{ secrets.GITLAB_REGISTRY_TOKEN }}' | docker login registry.gitlab.com -u '${{ secrets.GITLAB_REGISTRY_USER }}' --password-stdin && \
                 docker pull ${IMAGE_URL} && \
                 docker stop ${APP_NAME} || true && \

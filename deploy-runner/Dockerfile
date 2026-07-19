@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     sudo \
     libicu-dev
 
+RUN curl -fsSL https://get.docker.com/ | sh
+
 RUN useradd -m runner && usermod -aG sudo runner && echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 WORKDIR /home/runner
