@@ -56,10 +56,13 @@ jobs:
               APP_NAME=$(echo "$APP_NAME_RAW" | tr '[:upper:]' '[:lower:]')
               IMAGE_URL="registry.gitlab.com/durundur/env-registry/${APP_NAME}:latest"
 
+              echo "${ENV_VARIABLES_JSON}" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > local.env
+
+              ssh -i private_key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} "sudo mkdir -p /apps/${APP_NAME} && sudo chown -R \$(whoami):\$(whoami) /apps/${APP_NAME}"
+
+              scp -i private_key.pem -o StrictHostKeyChecking=no local.env ${SERVER_USER}@${SERVER_HOST}:/apps/${APP_NAME}/app.env
+
               ssh -i private_key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_HOST} "
-                sudo mkdir -p /apps/${APP_NAME} && \
-                sudo chown -R \$(whoami):\$(whoami) /apps/${APP_NAME} && \
-                echo '${ENV_VARIABLES_JSON}' | jq -r 'to_entries | .[] | \"\(.key)=\(.value)\"' > /apps/${APP_NAME}/app.env && \
                 echo '${{ secrets.GITLAB_REGISTRY_TOKEN }}' | sudo docker login registry.gitlab.com -u '${{ secrets.GITLAB_REGISTRY_USER }}' --password-stdin && \
                 sudo docker pull ${IMAGE_URL} && \
                 sudo docker stop ${APP_NAME} || true && \
