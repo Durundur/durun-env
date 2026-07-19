@@ -1,11 +1,10 @@
-version: '3.8'
-
 services:
   deploy-runner:
     build: .
     image: registry.gitlab.com/durundur/env-registry/deploy-runner:latest
     container_name: deploy-runner
     restart: always
+    privileged: true
     environment:
       - GITHUB_OWNER=${GITHUB_OWNER}
       - GITHUB_REPOSITORY=${GITHUB_REPOSITORY}

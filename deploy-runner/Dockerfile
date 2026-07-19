@@ -21,6 +21,7 @@ RUN curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L https://github.
     && rm actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
 
 COPY --chown=runner:runner entrypoint.sh ./entrypoint.sh
+RUN sed -i 's/\r$//' ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
