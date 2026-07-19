@@ -5,6 +5,8 @@ services:
     container_name: deploy-runner
     restart: always
     privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - GITHUB_OWNER=${GITHUB_OWNER}
       - GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
