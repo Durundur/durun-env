@@ -43,7 +43,6 @@ jobs:
                   script: |
                       sudo -S cp ~/gateway-tmp/nginx/nginx.conf /etc/nginx/nginx.conf <<< "$REVERSE_PROXY_SERVER_PASSWORD"
                       sudo -S cp -r ~/gateway-tmp/nginx/sites-available/* /etc/nginx/http.d/ <<< "$REVERSE_PROXY_SERVER_PASSWORD"
-                      sudo -S cp -r ~/gateway-tmp/wireguard/* /etc/wireguard/ <<< "$REVERSE_PROXY_SERVER_PASSWORD"
 
                       rm -rf ~/gateway-tmp
 
